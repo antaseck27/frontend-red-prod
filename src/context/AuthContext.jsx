@@ -3,7 +3,7 @@
 // // export const useAuth = () => useContext(AuthContext);
 
 // import { createContext, useContext, useEffect, useState } from "react";
-// import { API_URL } from "../api"; // Assure-toi que api.js est dans src/api.js
+// import { API_URL } from "../api";
 
 // const AuthContext = createContext(null);
 
@@ -15,7 +15,7 @@
 //     const token = localStorage.getItem("authToken");
 //     const storedUser = localStorage.getItem("user");
 
-//     // Charger l'utilisateur depuis le localStorage si présent
+//     // Charger user depuis localStorage
 //     if (storedUser && storedUser !== "undefined") {
 //       try {
 //         setUser(JSON.parse(storedUser));
@@ -25,14 +25,14 @@
 //       }
 //     }
 
-//     // Si pas de token, arrêter le chargement
+//     // Si pas de token → stop
 //     if (!token) {
 //       setLoading(false);
 //       return;
 //     }
 
-//     // Vérifier le token auprès du backend
-//     fetch(`${API_URL}/api/me`, {
+//     // Vérifier token backend
+//     fetch(`${API_URL}/me`, {
 //       headers: {
 //         Accept: "application/json",
 //         Authorization: "Bearer " + token,
@@ -55,13 +55,13 @@
 //       .finally(() => setLoading(false));
 //   }, []);
 
-//   // Déconnexion
+//   // Logout
 //   const logout = async () => {
 //     const token = localStorage.getItem("authToken");
 
 //     if (token) {
 //       try {
-//         await fetch(`${API_URL}/api/logout`, {
+//         await fetch(`${API_URL}/logout`, {
 //           method: "POST",
 //           headers: {
 //             Accept: "application/json",
@@ -87,6 +87,7 @@
 
 // export const useAuth = () => useContext(AuthContext);
 
+
 import { createContext, useContext, useEffect, useState } from "react";
 import { API_URL } from "../api";
 
@@ -95,6 +96,13 @@ const AuthContext = createContext(null);
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  // 🔥 LOGIN INSTANTANÉ (sans refresh)
+  const login = (userData, token) => {
+    localStorage.setItem("authToken", token);
+    localStorage.setItem("user", JSON.stringify(userData));
+    setUser(userData);
+  };
 
   useEffect(() => {
     const token = localStorage.getItem("authToken");
@@ -110,7 +118,6 @@ export const AuthProvider = ({ children }) => {
       }
     }
 
-    // Si pas de token → stop
     if (!token) {
       setLoading(false);
       return;
@@ -128,8 +135,9 @@ export const AuthProvider = ({ children }) => {
         return res.json();
       })
       .then((data) => {
-        setUser(data);
-        localStorage.setItem("user", JSON.stringify(data));
+        const realUser = data.user || data;
+        setUser(realUser);
+        localStorage.setItem("user", JSON.stringify(realUser));
       })
       .catch((err) => {
         console.error("Erreur d'authentification:", err);
@@ -140,7 +148,7 @@ export const AuthProvider = ({ children }) => {
       .finally(() => setLoading(false));
   }, []);
 
-  // Logout
+  // 🔥 LOGOUT
   const logout = async () => {
     const token = localStorage.getItem("authToken");
 
@@ -164,7 +172,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
