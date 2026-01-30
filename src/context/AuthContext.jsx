@@ -1,3 +1,5 @@
+
+
 // import { createContext, useContext, useEffect, useState } from "react";
 
 // const AuthContext = createContext(null);
@@ -10,12 +12,22 @@
 //     const token = localStorage.getItem("authToken");
 //     const storedUser = localStorage.getItem("user");
 
-//     if (storedUser) setUser(JSON.parse(storedUser));
+//     // ✅ Sécurité JSON.parse
+//     if (storedUser && storedUser !== "undefined") {
+//       try {
+//         setUser(JSON.parse(storedUser));
+//       } catch (e) {
+//         console.error("Erreur parsing user :", e);
+//         localStorage.removeItem("user");
+//       }
+//     }
 
 //     if (!token) {
 //       setLoading(false);
 //       return;
 //     }
+
+    
 
 //     fetch("http://127.0.0.1:8000/api/me", {
 //       headers: {
@@ -30,12 +42,14 @@
 //       .then((data) => {
 //         setUser(data);
 //         localStorage.setItem("user", JSON.stringify(data));
-//         setLoading(false);
 //       })
-//       .catch(() => {
+//       .catch((err) => {
+//         console.error("Auth error:", err);
 //         localStorage.removeItem("authToken");
 //         localStorage.removeItem("user");
 //         setUser(null);
+//       })
+//       .finally(() => {
 //         setLoading(false);
 //       });
 //   }, []);
@@ -44,13 +58,17 @@
 //     const token = localStorage.getItem("authToken");
 
 //     if (token) {
-//       await fetch("http://127.0.0.1:8000/api/logout", {
-//         method: "POST",
-//         headers: {
-//           Accept: "application/json",
-//           Authorization: "Bearer " + token,
-//         },
-//       });
+//       try {
+//         await fetch("http://127.0.0.1:8000/api/logout", {
+//           method: "POST",
+//           headers: {
+//             Accept: "application/json",
+//             Authorization: "Bearer " + token,
+//           },
+//         });
+//       } catch (e) {
+//         console.error("Logout error:", e);
+//       }
 //     }
 
 //     localStorage.removeItem("authToken");
@@ -68,6 +86,7 @@
 // export const useAuth = () => useContext(AuthContext);
 
 import { createContext, useContext, useEffect, useState } from "react";
+import { API_URL } from "../api"; // Assure-toi que api.js est dans src/api.js
 
 const AuthContext = createContext(null);
 
@@ -79,22 +98,24 @@ export const AuthProvider = ({ children }) => {
     const token = localStorage.getItem("authToken");
     const storedUser = localStorage.getItem("user");
 
-    // ✅ Sécurité JSON.parse
+    // Charger l'utilisateur depuis le localStorage si présent
     if (storedUser && storedUser !== "undefined") {
       try {
         setUser(JSON.parse(storedUser));
-      } catch (e) {
-        console.error("Erreur parsing user :", e);
+      } catch (err) {
+        console.error("Erreur parsing user:", err);
         localStorage.removeItem("user");
       }
     }
 
+    // Si pas de token, arrêter le chargement
     if (!token) {
       setLoading(false);
       return;
     }
 
-    fetch("http://127.0.0.1:8000/api/me", {
+    // Vérifier le token auprès du backend
+    fetch(`${API_URL}/api/me`, {
       headers: {
         Accept: "application/json",
         Authorization: "Bearer " + token,
@@ -109,30 +130,29 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem("user", JSON.stringify(data));
       })
       .catch((err) => {
-        console.error("Auth error:", err);
+        console.error("Erreur d'authentification:", err);
         localStorage.removeItem("authToken");
         localStorage.removeItem("user");
         setUser(null);
       })
-      .finally(() => {
-        setLoading(false);
-      });
+      .finally(() => setLoading(false));
   }, []);
 
+  // Déconnexion
   const logout = async () => {
     const token = localStorage.getItem("authToken");
 
     if (token) {
       try {
-        await fetch("http://127.0.0.1:8000/api/logout", {
+        await fetch(`${API_URL}/api/logout`, {
           method: "POST",
           headers: {
             Accept: "application/json",
             Authorization: "Bearer " + token,
           },
         });
-      } catch (e) {
-        console.error("Logout error:", e);
+      } catch (err) {
+        console.error("Erreur lors de la déconnexion:", err);
       }
     }
 
@@ -149,4 +169,3 @@ export const AuthProvider = ({ children }) => {
 };
 
 export const useAuth = () => useContext(AuthContext);
-
