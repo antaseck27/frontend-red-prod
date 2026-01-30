@@ -1,4 +1,6 @@
-const API_URL = "http://127.0.0.1:8000/api"; // ton backend Laravel
+// const API_URL = "http://127.0.0.1:8000/api"; 
+const API_URL = "https://red-backend-neww-production.up.railway.app/api";
+
 
 export const registerUser = async (userData) => {
   const response = await fetch(`${API_URL}/register`, {

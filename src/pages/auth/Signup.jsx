@@ -159,7 +159,10 @@ import { useNavigate } from "react-router-dom";
 import { FaHotel } from "react-icons/fa";
 
 // const API_URL = "http://127.0.0.1:8000/api";
-const API_URL = import.meta.env.VITE_API_URL;
+// const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = "https://red-backend-neww-production.up.railway.app/api/"; 
+
+
 
 
 const Signup = () => {
