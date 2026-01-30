@@ -204,7 +204,7 @@ const Sidebar = ({ open, setOpen }) => {
     localStorage.removeItem("authToken");
     localStorage.removeItem("user");
       logout();
-    navigate("/login", { replace: true });
+    navigate("/login") ;
   };
 
   return (
