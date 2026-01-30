@@ -193,7 +193,8 @@ const menuItems = [
 const Sidebar = ({ open, setOpen }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user } = useAuth(); // 🔥 récupération du user connecté
+  const { user, logout } = useAuth();
+  // const { user } = useAuth(); 
 
   const handleLinkClick = () => {
     if (window.innerWidth < 768) setOpen(false);
@@ -202,6 +203,7 @@ const Sidebar = ({ open, setOpen }) => {
   const handleLogout = () => {
     localStorage.removeItem("authToken");
     localStorage.removeItem("user");
+      logout();
     navigate("/login");
   };
 
@@ -263,9 +265,13 @@ const Sidebar = ({ open, setOpen }) => {
             className="user-avatar w-10 h-10 rounded-full"
           />
           <div>
+            {/* <p className="user-name">
+              {user?.name || "Utilisateur"} 
+            </p> */}
             <p className="user-name">
-              {user?.name || "Utilisateur"} {/* 🔥 user connecté */}
-            </p>
+  {user?.name || "Utilisateur"}
+</p>
+
             <span className="user-status flex items-center text-gray-300 text-sm">
               <span className="status-dot w-2 h-2 rounded-full bg-green-400 mr-1" />
               en ligne
