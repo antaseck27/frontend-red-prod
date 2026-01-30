@@ -589,7 +589,8 @@ const ListHotels = () => {
           >
             {hotel.image && (
               <img
-                src={`http://127.0.0.1:8000/storage/${hotel.image}`}
+                // src={`http://127.0.0.1:8000/storage/${hotel.image}`}
+                src={`https://red-backend-neww-production.up.railway.app/storage/${hotel.image}`}
                 className="h-60 w-320 object-cover rounded-lg"
                 alt={hotel.name}
               />
