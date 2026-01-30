@@ -458,7 +458,8 @@
 import { useState, useEffect } from "react";
 import { FaStar, FaPlus, FaCamera } from "react-icons/fa";
 
-const API_URL = "http://127.0.0.1:8000/api";
+                // const API_URL = "http://127.0.0.1:8000/api";
+const API_URL = "https://red-backend-neww-production.up.railway.app/api";
 
 const ListHotels = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
