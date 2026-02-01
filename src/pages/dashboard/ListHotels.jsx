@@ -168,10 +168,11 @@
 //   );
 // };
 
-// export default ListHotels;
+
+
 
 import { useState, useEffect } from "react";
-import { FaPlus, FaCamera } from "react-icons/fa";
+import { FaStar, FaPlus, FaCamera } from "react-icons/fa";
 
 const API_URL = "https://red-backend-neww-production.up.railway.app/api";
 
@@ -193,9 +194,6 @@ const ListHotels = () => {
 
   const token = localStorage.getItem("authToken");
 
-  const openModal = () => setIsModalOpen(true);
-  const closeModal = () => setIsModalOpen(false);
-
   useEffect(() => {
     fetchHotels();
   }, []);
@@ -209,8 +207,7 @@ const ListHotels = () => {
         },
       });
       const data = await res.json();
-      // si tu utilises Response::api(), data.data contient les hotels
-      setHotels(data.data || data);
+      setHotels(data);
     } catch (err) {
       console.error("FETCH HOTELS ERROR 👉", err);
     }
@@ -238,7 +235,7 @@ const ListHotels = () => {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
-          // Ne pas mettre Content-Type avec FormData
+          // Ne pas mettre Content-Type avec FormData, fetch le gère automatiquement
         },
         body: data,
       });
@@ -262,7 +259,7 @@ const ListHotels = () => {
       });
       setSelectedImage(null);
       setImageFile(null);
-      closeModal();
+      setIsModalOpen(false);
 
       fetchHotels();
     } catch (err) {
@@ -276,13 +273,16 @@ const ListHotels = () => {
   return (
     <div className="p-6">
       {/* Header */}
-      <div className="fixed top-15 left-0 right-0 md:left-[322px] p-6 shadow-md bg-white flex justify-between items-center rounded-lg">
-        <h2 className="text-2xl font-semibold text-gray-800">
-          Hôtels ({hotels.length})
-        </h2>
+      <div className="fixed top-15 left-0 right-0 md:left-[322px] p-10 shadow-md p-6 bg-white welcome-section body flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 shadow-lg p-4 rounded-lg">
+        <div>
+          <h2 className="text-2xl font-semibold text-gray-800">
+            Hôtels ({hotels.length})
+          </h2>
+        </div>
+
         <button
-          onClick={openModal}
-          className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition"
+          onClick={() => setIsModalOpen(true)}
+          className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition self-start md:self-auto"
         >
           <FaPlus /> Créer un nouvel hôtel
         </button>
@@ -295,16 +295,12 @@ const ListHotels = () => {
             key={hotel.id}
             className="bg-white rounded-lg shadow p-2 flex flex-col gap-2"
           >
-            {hotel.image ? (
+            {hotel.image && (
               <img
-                src={`https://red-backend-neww-production.up.railway.app/storage/${hotel.image}`}
+                src={hotel.image} // ✅ Cloudinary renvoie déjà l'URL sécurisée
                 className="h-60 w-full object-cover rounded-lg"
                 alt={hotel.name}
               />
-            ) : (
-              <div className="h-60 w-full bg-gray-200 flex items-center justify-center rounded-lg">
-                Pas d'image
-              </div>
             )}
             <p className="text-sm text-yellow-900">{hotel.address}</p>
             <h3 className="font-semibold text-lg">{hotel.name}</h3>
@@ -315,16 +311,17 @@ const ListHotels = () => {
         ))}
       </div>
 
-      {/* Modal */}
+      {/* Modal complet */}
       {isModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center z-50">
           <div
             className="absolute inset-0 bg-black opacity-20"
-            onClick={closeModal}
+            onClick={() => setIsModalOpen(false)}
           />
-          <div className="relative bg-white rounded-lg w-full max-w-2xl p-6 shadow-lg z-10 overflow-y-auto max-h-[95vh] mx-4">
+
+          <div className="relative bg-white rounded-lg w-full max-w-full md:max-w-5xl p-6 shadow-lg z-10 overflow-y-auto max-h-[95vh] mx-4">
             <button
-              onClick={closeModal}
+              onClick={() => setIsModalOpen(false)}
               className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-2xl font-bold"
             >
               &times;
@@ -335,6 +332,7 @@ const ListHotels = () => {
             </h3>
 
             <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Row 1 */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <input
                   type="text"
@@ -358,6 +356,7 @@ const ListHotels = () => {
                 />
               </div>
 
+              {/* Row 2 */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <input
                   type="email"
@@ -381,6 +380,7 @@ const ListHotels = () => {
                 />
               </div>
 
+              {/* Row 3 */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <input
                   type="number"
@@ -408,9 +408,10 @@ const ListHotels = () => {
                 </select>
               </div>
 
+              {/* Image */}
               <div>
                 <div
-                  className="w-full h-72 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50"
+                  className="w-full h-70 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50"
                   onClick={() =>
                     document.getElementById("hotelImageInput").click()
                   }
@@ -436,6 +437,7 @@ const ListHotels = () => {
                 </div>
               </div>
 
+              {/* Submit */}
               <button
                 type="submit"
                 className={`w-full py-3 rounded-lg bg-gray-900 text-white hover:bg-gray-800 transition text-lg font-medium ${
@@ -457,23 +459,10 @@ export default ListHotels;
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+// // export default ListHotels;
 
 // import { useState, useEffect } from "react";
-// import { FaStar, FaPlus, FaCamera } from "react-icons/fa";
+// import { FaPlus, FaCamera } from "react-icons/fa";
 
 // const API_URL = "https://red-backend-neww-production.up.railway.app/api";
 
@@ -511,7 +500,8 @@ export default ListHotels;
 //         },
 //       });
 //       const data = await res.json();
-//       setHotels(data);
+//       // si tu utilises Response::api(), data.data contient les hotels
+//       setHotels(data.data || data);
 //     } catch (err) {
 //       console.error("FETCH HOTELS ERROR 👉", err);
 //     }
@@ -527,7 +517,7 @@ export default ListHotels;
 
 //   const handleSubmit = async (e) => {
 //     e.preventDefault();
-//     if (submitting) return; // prévention double submit
+//     if (submitting) return;
 //     setSubmitting(true);
 
 //     const data = new FormData();
@@ -539,7 +529,7 @@ export default ListHotels;
 //         method: "POST",
 //         headers: {
 //           Authorization: `Bearer ${token}`,
-//           Accept: "application/json",
+//           // Ne pas mettre Content-Type avec FormData
 //         },
 //         body: data,
 //       });
@@ -577,16 +567,13 @@ export default ListHotels;
 //   return (
 //     <div className="p-6">
 //       {/* Header */}
-//       <div className="fixed top-15 left-0 right-0 md:left-[322px] p-10 shadow-md p-6 bg-white welcome-section body flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 shadow-lg p-4 rounded-lg">
-//         <div>
-//           <h2 className="text-2xl font-semibold text-gray-800">
-//             Hôtels ({hotels.length})
-//           </h2>
-//         </div>
-
+//       <div className="fixed top-15 left-0 right-0 md:left-[322px] p-6 shadow-md bg-white flex justify-between items-center rounded-lg">
+//         <h2 className="text-2xl font-semibold text-gray-800">
+//           Hôtels ({hotels.length})
+//         </h2>
 //         <button
 //           onClick={openModal}
-//           className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition self-start md:self-auto"
+//           className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition"
 //         >
 //           <FaPlus /> Créer un nouvel hôtel
 //         </button>
@@ -599,12 +586,16 @@ export default ListHotels;
 //             key={hotel.id}
 //             className="bg-white rounded-lg shadow p-2 flex flex-col gap-2"
 //           >
-//             {hotel.image && (
+//             {hotel.image ? (
 //               <img
 //                 src={`https://red-backend-neww-production.up.railway.app/storage/${hotel.image}`}
-//                 className="h-60 w-320 object-cover rounded-lg"
+//                 className="h-60 w-full object-cover rounded-lg"
 //                 alt={hotel.name}
 //               />
+//             ) : (
+//               <div className="h-60 w-full bg-gray-200 flex items-center justify-center rounded-lg">
+//                 Pas d'image
+//               </div>
 //             )}
 //             <p className="text-sm text-yellow-900">{hotel.address}</p>
 //             <h3 className="font-semibold text-lg">{hotel.name}</h3>
@@ -615,15 +606,14 @@ export default ListHotels;
 //         ))}
 //       </div>
 
-//       {/* Modal complet */}
+//       {/* Modal */}
 //       {isModalOpen && (
 //         <div className="fixed inset-0 flex items-center justify-center z-50">
 //           <div
 //             className="absolute inset-0 bg-black opacity-20"
 //             onClick={closeModal}
 //           />
-
-//           <div className="relative bg-white rounded-lg w-full max-w-full md:max-w-5xl p-6 shadow-lg z-10 overflow-y-auto max-h-[95vh] mx-4">
+//           <div className="relative bg-white rounded-lg w-full max-w-2xl p-6 shadow-lg z-10 overflow-y-auto max-h-[95vh] mx-4">
 //             <button
 //               onClick={closeModal}
 //               className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-2xl font-bold"
@@ -636,7 +626,6 @@ export default ListHotels;
 //             </h3>
 
 //             <form onSubmit={handleSubmit} className="space-y-6">
-//               {/* Row 1 */}
 //               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 //                 <input
 //                   type="text"
@@ -660,7 +649,6 @@ export default ListHotels;
 //                 />
 //               </div>
 
-//               {/* Row 2 */}
 //               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 //                 <input
 //                   type="email"
@@ -684,7 +672,6 @@ export default ListHotels;
 //                 />
 //               </div>
 
-//               {/* Row 3 */}
 //               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 //                 <input
 //                   type="number"
@@ -712,10 +699,9 @@ export default ListHotels;
 //                 </select>
 //               </div>
 
-//               {/* Image */}
 //               <div>
 //                 <div
-//                   className="w-full h-70 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50"
+//                   className="w-full h-72 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50"
 //                   onClick={() =>
 //                     document.getElementById("hotelImageInput").click()
 //                   }
@@ -741,7 +727,6 @@ export default ListHotels;
 //                 </div>
 //               </div>
 
-//               {/* Submit */}
 //               <button
 //                 type="submit"
 //                 className={`w-full py-3 rounded-lg bg-gray-900 text-white hover:bg-gray-800 transition text-lg font-medium ${
@@ -760,4 +745,19 @@ export default ListHotels;
 // };
 
 // export default ListHotels;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
