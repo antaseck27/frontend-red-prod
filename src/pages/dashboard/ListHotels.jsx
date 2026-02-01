@@ -174,9 +174,7 @@
 import { useState, useEffect } from "react";
 import { FaPlus, FaCamera } from "react-icons/fa";
 
-// const API_URL = import.meta.env.VITE_API_URL; 
-// Mauvais
-const API_URL = "https://red-backend-neww.up.railway.app/api";
+const API_URL = import.meta.env.VITE_API_URL; 
 
 const ListHotels = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
