@@ -49,7 +49,6 @@ import Signup from "./pages/auth/Signup";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import DashboardHome from "./pages/dashboard/DashboardHome";
 import ListHotels from "./pages/dashboard/ListHotels";
-import Counter from "./components/Counter";
 
 function App() {
   return (
@@ -68,7 +67,6 @@ function App() {
           <Route path="/dashboard" element={<DashboardHome />} />
           <Route path="/dashboard/hotels" element={<ListHotels />} />
         </Route>
-        <Route path="/counter" element={<Counter />} />
 
         {/* Redirect si page non trouvée */}
         <Route path="*" element={<Navigate to="/" />} />
