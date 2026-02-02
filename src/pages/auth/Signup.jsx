@@ -1,11 +1,18 @@
 
+
 // // export default Signup;
 
 // import { useState } from "react";
 // import { useNavigate } from "react-router-dom";
 // import { FaHotel } from "react-icons/fa";
 
-// const API_URL = "http://127.0.0.1:8000/api"; // URL de ton backend Laravel
+// // const API_URL = "http://127.0.0.1:8000/api";
+// // const API_URL = import.meta.env.VITE_API_URL;
+// // const API_URL = "https://red-backend-neww-production.up.railway.app/api"; 
+// const API_URL = "https://red-backend-neww-production.up.railway.app/api";
+
+
+
 
 // const Signup = () => {
 //   const [name, setName] = useState("");
@@ -28,7 +35,7 @@
 //         method: "POST",
 //         headers: {
 //           "Content-Type": "application/json",
-//           "Accept": "application/json",
+//           Accept: "application/json",
 //         },
 //         body: JSON.stringify({
 //           name,
@@ -41,17 +48,16 @@
 //       const data = await response.json();
 
 //       if (!response.ok) {
-//         // Affiche les erreurs retournées par Laravel
 //         setError(data.message || "Erreur lors de l'inscription");
 //         return;
 //       }
 
-//       console.log("Utilisateur créé :", data);
+//       // 🔥 Stockage du token et utilisateur
+//       if (data.token) {
+//         localStorage.setItem("authToken", data.token);
+//         localStorage.setItem("user", JSON.stringify(data.user));
+//       }
 
-//       // Stocker le token si Laravel renvoie un token (JWT ou Sanctum)
-//       if (data.token) localStorage.setItem("authToken", data.token);
-
-//       // Redirection vers le dashboard
 //       navigate("/dashboard");
 
 //     } catch (err) {
@@ -63,7 +69,7 @@
 //   return (
 //     <div className="min-h-screen login flex justify-center items-center p-4">
 //       <div className="w-[340px] -mt-[50px] h-auto">
-        
+
 //         {/* Logo */}
 //         <div className="flex justify-center mb-8">
 //           <div className="flex items-center gap-2">
@@ -74,45 +80,35 @@
 //           </div>
 //         </div>
 
-//         {/* Card formulaire */}
+//         {/* Formulaire */}
 //         <div className="bg-white rounded-md p-8 shadow-xl">
 //           <h2 className="text-gray-800 mb-4 m-2">Créer un compte</h2>
 
 //           {error && <p className="text-red-500 mb-2">{error}</p>}
 
 //           <form onSubmit={handleSubmit} className="space-y-5">
-
-//             {/* Nom */}
 //             <input
 //               type="text"
 //               placeholder="Votre nom complet"
 //               value={name}
 //               onChange={(e) => setName(e.target.value)}
-//               className="w-full h-[58px] px-3 border-b-2 border-gray-300 
-//               focus:border-gray-600 outline-none text-gray-800 shadow-sm"
+//               className="w-full h-[58px] px-3 border-b-2 border-gray-300 focus:border-gray-600 outline-none text-gray-800 shadow-sm"
 //             />
-
-//             {/* Email */}
 //             <input
 //               type="email"
 //               placeholder="Votre email"
 //               value={email}
 //               onChange={(e) => setEmail(e.target.value)}
-//               className="w-full h-[58px] px-3 border-b-2 border-gray-300 
-//               focus:border-gray-600 outline-none text-gray-800 shadow-sm"
+//               className="w-full h-[58px] px-3 border-b-2 border-gray-300 focus:border-gray-600 outline-none text-gray-800 shadow-sm"
 //             />
-
-//             {/* Mot de passe */}
 //             <input
 //               type="password"
 //               placeholder="Votre mot de passe"
 //               value={password}
 //               onChange={(e) => setPassword(e.target.value)}
-//               className="w-full h-[58px] px-3 border-b-2 border-gray-300 
-//               focus:border-gray-600 outline-none text-gray-800 shadow-sm"
+//               className="w-full h-[58px] px-3 border-b-2 border-gray-300 focus:border-gray-600 outline-none text-gray-800 shadow-sm"
 //             />
 
-//             {/* Acceptation termes */}
 //             <div className="flex items-center text-sm text-gray-600 p-2">
 //               <input
 //                 type="checkbox"
@@ -126,11 +122,9 @@
 //               </label>
 //             </div>
 
-//             {/* Bouton inscription */}
 //             <button
 //               type="submit"
-//               className="w-full h-[48px] text-white rounded-lg 
-//               hover:bg-gray-800 transition font-medium"
+//               className="w-full h-[48px] text-white rounded-lg hover:bg-gray-800 transition font-medium"
 //               style={{ backgroundColor: '#494C4F' }}
 //             >
 //               S’inscrire
@@ -138,7 +132,6 @@
 //           </form>
 //         </div>
 
-//         {/* Liens */}
 //         <div className="mt-5 text-center text-sm text-white space-y-1">
 //           <p>
 //             Vous avez déjà un compte ?{" "}
@@ -147,6 +140,7 @@
 //             </a>
 //           </p>
 //         </div>
+
 //       </div>
 //     </div>
 //   );
@@ -154,7 +148,8 @@
 
 // export default Signup;
 
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaHotel } from "react-icons/fa";
 
@@ -163,22 +158,42 @@ import { FaHotel } from "react-icons/fa";
 // const API_URL = "https://red-backend-neww-production.up.railway.app/api"; 
 const API_URL = "https://red-backend-neww-production.up.railway.app/api";
 
-
-
-
 const Signup = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  // Rediriger si l'utilisateur est déjà connecté
+  useEffect(() => {
+    if (localStorage.getItem("authToken")) {
+      navigate("/dashboard");
+    }
+  }, [navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!name || !email || !password || !acceptedTerms) {
       setError("Veuillez remplir tous les champs et accepter les termes");
+      return;
+    }
+
+    setLoading(true);
+
+    // Validation de l'email et du mot de passe
+    if (!email.match(/^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$/)) {
+      setError("L'email n'est pas valide");
+      setLoading(false);
+      return;
+    }
+
+    if (password.length < 8) {
+      setError("Le mot de passe doit comporter au moins 8 caractères");
+      setLoading(false);
       return;
     }
 
@@ -201,10 +216,11 @@ const Signup = () => {
 
       if (!response.ok) {
         setError(data.message || "Erreur lors de l'inscription");
+        setLoading(false);
         return;
       }
 
-      // 🔥 Stockage du token et utilisateur
+      // Stockage du token et utilisateur
       if (data.token) {
         localStorage.setItem("authToken", data.token);
         localStorage.setItem("user", JSON.stringify(data.user));
@@ -215,13 +231,14 @@ const Signup = () => {
     } catch (err) {
       console.error(err);
       setError("Erreur réseau, veuillez réessayer plus tard");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="min-h-screen login flex justify-center items-center p-4">
       <div className="w-[340px] -mt-[50px] h-auto">
-
         {/* Logo */}
         <div className="flex justify-center mb-8">
           <div className="flex items-center gap-2">
@@ -236,7 +253,11 @@ const Signup = () => {
         <div className="bg-white rounded-md p-8 shadow-xl">
           <h2 className="text-gray-800 mb-4 m-2">Créer un compte</h2>
 
-          {error && <p className="text-red-500 mb-2">{error}</p>}
+          {error && (
+            <p className="text-red-500 mb-2" aria-live="assertive">
+              {error}
+            </p>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <input
@@ -278,8 +299,9 @@ const Signup = () => {
               type="submit"
               className="w-full h-[48px] text-white rounded-lg hover:bg-gray-800 transition font-medium"
               style={{ backgroundColor: '#494C4F' }}
+              disabled={loading}
             >
-              S’inscrire
+              {loading ? "Chargement..." : "S’inscrire"}
             </button>
           </form>
         </div>
@@ -292,7 +314,6 @@ const Signup = () => {
             </a>
           </p>
         </div>
-
       </div>
     </div>
   );
